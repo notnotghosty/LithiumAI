@@ -1,0 +1,21 @@
+{
+  "CosmeticRelationships": {
+    "CID_399_Athena_Commando_F_AshtonBoardwalk": {
+      "EID_AshtonBoardwalk": 5
+    },
+    "EID_AshtonBoardwalk": {
+      "CID_399_Athena_Commando_F_AshtonBoardwalk": 5
+    }
+  },
+  "ShopFeedback": {},
+  "ItemRatings": {
+    "Wrap_011_HotCold": 1,
+    "EID_DreamFeet": 1,
+    "Pickaxe_ID_147_TechOps": 1,
+    "CID_381_Athena_Commando_F_BaseballKitbash": 2,
+    "Pickaxe_ID_106_DarkBomber": 2,
+    "Glider_ID_009_CandyCoat": 1,
+    "EID_HiLowWave": 1,
+    "Pickaxe_ID_172_BandageNinja": 1
+  }
+}
