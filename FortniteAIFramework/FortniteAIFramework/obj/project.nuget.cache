@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "pTF1LW8L5fQIUi2MipD6qh29Td6Me8ZyR30FQVVFYll5zQhAMCz5e/7mvrE1cLFu2urqebFaY6LVD5ATbPEhnA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Ghost\\source\\repos\\FortniteAIFramework\\FortniteAIFramework\\FortniteAIFramework.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Ghost\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

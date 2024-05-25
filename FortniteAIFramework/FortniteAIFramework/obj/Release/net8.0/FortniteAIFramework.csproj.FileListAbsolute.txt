@@ -1,0 +1,17 @@
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\bin\Release\net8.0\FortniteAIFramework.exe
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\bin\Release\net8.0\FortniteAIFramework.deps.json
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\bin\Release\net8.0\FortniteAIFramework.runtimeconfig.json
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\bin\Release\net8.0\FortniteAIFramework.dll
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\bin\Release\net8.0\FortniteAIFramework.pdb
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.AssemblyInfoInputs.cache
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.AssemblyInfo.cs
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.csproj.CoreCompileInputs.cache
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.dll
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\refint\FortniteAIFramework.dll
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.pdb
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.genruntimeconfig.cache
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\ref\FortniteAIFramework.dll
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\bin\Release\net8.0\Newtonsoft.Json.dll
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\FortniteAIFramework.csproj.AssemblyReference.cache
+C:\Users\Ghost\source\repos\FortniteAIFramework\FortniteAIFramework\obj\Release\net8.0\Fortnite.D680C0CF.Up2Date
