@@ -7,7 +7,6 @@ class ItemShop
 {
     public List<Cosmetic> DailyItems { get; set; }
     public List<Cosmetic> FeaturedItems { get; set; }
-    public string Rating { get; set; }
 }
 
 class Cosmetic
@@ -32,8 +31,9 @@ class CosmeticShopAI
     private List<ItemShop> goodShopsHistory;
     private Random random;
     private Dictionary<(string, string), int> itemRelationships;
+    private List<Cosmetic> allItems;
 
-    public CosmeticShopAI()
+    public CosmeticShopAI(List<Cosmetic> items)
     {
         itemWeights = new Dictionary<string, double>();
         feedbackScores = new Dictionary<string, double>();
@@ -41,12 +41,13 @@ class CosmeticShopAI
         goodShopsHistory = new List<ItemShop>();
         random = new Random();
         itemRelationships = new Dictionary<(string, string), int>();
+        allItems = items;
     }
 
-    public void GenerateAndDisplayItemShop(List<Cosmetic> items)
+    public void GenerateAndDisplayItemShop()
     {
-        List<Cosmetic> dailyItems = SelectItems(items, 6);
-        List<Cosmetic> featuredItems = SelectItems(items, 2);
+        List<Cosmetic> dailyItems = SelectUniqueItems(6);
+        List<Cosmetic> featuredItems = SelectUniqueItems(2, dailyItems);
 
         ItemShop itemShop = new ItemShop { DailyItems = dailyItems, FeaturedItems = featuredItems };
         shopHistory.Add(itemShop);
@@ -64,9 +65,9 @@ class CosmeticShopAI
         }
     }
 
-    public void RateItemShop(List<Cosmetic> items)
+    public void RateItemShop()
     {
-        ItemShop itemShop = GenerateAndDisplayItemShopWithReturn(items);
+        ItemShop itemShop = GenerateAndDisplayItemShopWithReturn();
 
         Console.WriteLine("Please rate the item shop:");
         Console.WriteLine("Is it good or bad?");
@@ -105,22 +106,28 @@ class CosmeticShopAI
 
     public void TrainCosmeticRelationship()
     {
-        Console.WriteLine("Please provide two item IDs to train their relationship:");
-        Console.Write("First item ID: ");
-        string firstItemId = Console.ReadLine();
-        Console.Write("Second item ID: ");
-        string secondItemId = Console.ReadLine();
-        while (true)
+        Console.WriteLine("The AI will provide two item IDs to train their relationship.");
+
+        for (int i = 0; i < 10; i++) // Assuming 10 pairs for training
         {
-            Console.WriteLine("Please rate the similarity of these items (1-5):");
-            if (int.TryParse(Console.ReadLine(), out int similarity) && similarity >= 1 && similarity <= 5)
+            Cosmetic firstItem = allItems[random.Next(allItems.Count)];
+            Cosmetic secondItem = allItems[random.Next(allItems.Count)];
+
+            if (firstItem.Id == secondItem.Id) // Skip if same items are selected
+                continue;
+
+            Console.WriteLine($"Rate the similarity between {firstItem.Id} and {secondItem.Id} (1-5):");
+            while (true)
             {
-                TrainCosmeticRelationship(firstItemId, secondItemId, similarity);
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid rating. Please enter a number between 1 and 5.");
+                if (int.TryParse(Console.ReadLine(), out int similarity) && similarity >= 1 && similarity <= 5)
+                {
+                    TrainCosmeticRelationship(firstItem.Id, secondItem.Id, similarity);
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid rating. Please enter a number between 1 and 5.");
+                }
             }
         }
     }
@@ -195,15 +202,18 @@ class CosmeticShopAI
         }
     }
 
-    public void BenchmarkAI(List<Cosmetic> items)
+    public void BenchmarkAI()
     {
         int totalShops = 10;
         int correctPredictions = 0;
+        List<ItemShop> benchmarkShops = new List<ItemShop>();
 
         for (int i = 0; i < totalShops; i++)
         {
-            var dailyItems = SelectItems(items, 6);
-            var featuredItems = SelectItems(items, 2);
+            var dailyItems = SelectUniqueItems(6);
+            var featuredItems = SelectUniqueItems(2, dailyItems);
+            ItemShop itemShop = new ItemShop { DailyItems = dailyItems, FeaturedItems = featuredItems };
+            benchmarkShops.Add(itemShop);
 
             foreach (var item in dailyItems)
             {
@@ -222,93 +232,174 @@ class CosmeticShopAI
             }
         }
 
+        // Export benchmark shop data
+        ExportBenchmarkShops(benchmarkShops);
+
         double accuracy = (double)correctPredictions / (totalShops * 8) * 100;
         Console.WriteLine($"Benchmark AI Accuracy: {accuracy}%");
     }
 
-    public List<Cosmetic> SelectItems(List<Cosmetic> items, int count)
+    public void ExportBenchmarkShops(List<ItemShop> benchmarkShops)
     {
-        List<Cosmetic> selectedItems = new List<Cosmetic>();
-        HashSet<string> selectedIds = new HashSet<string>();
-
-        while (selectedItems.Count < count)
+        using (StreamWriter writer = new StreamWriter("benchmark_shops.txt"))
         {
-            Cosmetic item = items[random.Next(items.Count)];
-
-            if (!selectedIds.Contains(item.Id))
+            foreach (var shop in benchmarkShops)
             {
-                selectedItems.Add(item);
-                selectedIds.Add(item.Id);
+                writer.WriteLine("Shop:");
+                writer.WriteLine("Daily Items:");
+                foreach (var item in shop.DailyItems)
+                {
+                    writer.WriteLine($"{item.Category}:{item.Id},{item.Price}");
+                }
+                writer.WriteLine("Featured Items:");
+                foreach (var item in shop.FeaturedItems)
+                {
+                    writer.WriteLine($"{item.Category}:{item.Id},{item.Price}");
+                }
+                writer.WriteLine();
             }
         }
+        Console.WriteLine("Benchmark shop data exported successfully.");
+    }
 
-        return selectedItems;
+    public List<ItemShop> LoadBenchmarkShops()
+    {
+        List<ItemShop> benchmarkShops = new List<ItemShop>();
+
+        if (File.Exists("benchmark_shops.txt"))
+        {
+            using (StreamReader reader = new StreamReader("benchmark_shops.txt"))
+            {
+                while (!reader.EndOfStream)
+                {
+                    ItemShop shop = new ItemShop();
+                    List<Cosmetic> dailyItems = new List<Cosmetic>();
+                    List<Cosmetic> featuredItems = new List<Cosmetic>();
+
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (line == "Shop:")
+                            continue;
+                        else if (line == "Daily Items:")
+                        {
+                            while ((line = reader.ReadLine()) != "Featured Items:")
+                            {
+                                string[] parts = line.Split(new char[] { ':', ',' });
+                                dailyItems.Add(new Cosmetic(parts[0], parts[1], int.Parse(parts[2])));
+                            }
+                        }
+                        else if (line == "Featured Items:")
+                        {
+                            while (!string.IsNullOrEmpty(line = reader.ReadLine()))
+                            {
+                                string[] parts = line.Split(new char[] { ':', ',' });
+                                featuredItems.Add(new Cosmetic(parts[0], parts[1], int.Parse(parts[2])));
+                            }
+                        }
+                    }
+
+                    shop.DailyItems = dailyItems;
+                    shop.FeaturedItems = featuredItems;
+                    benchmarkShops.Add(shop);
+                }
+            }
+            Console.WriteLine("Benchmark shop data loaded successfully.");
+        }
+        else
+        {
+            Console.WriteLine("No benchmark shop data found.");
+        }
+
+        return benchmarkShops;
     }
 
     public void ProvideShopFeedback(string itemId, int rating)
     {
-        if (feedbackScores.ContainsKey(itemId))
-        {
-            feedbackScores[itemId] = (feedbackScores[itemId] + rating) / 2.0;
-        }
-        else
-        {
-            feedbackScores[itemId] = rating;
-        }
+        feedbackScores[itemId] = rating;
     }
 
     public void UpdateModel(bool isGoodFeedback)
     {
-        foreach (var feedback in feedbackScores)
+        foreach (var entry in feedbackScores)
         {
-            if (itemWeights.ContainsKey(feedback.Key))
+            string itemId = entry.Key;
+            double rating = entry.Value;
+
+            if (!itemWeights.ContainsKey(itemId))
             {
-                itemWeights[feedback.Key] = (itemWeights[feedback.Key] + feedback.Value) / 2.0;
+                itemWeights[itemId] = 0;
+            }
+
+            if (isGoodFeedback)
+            {
+                itemWeights[itemId] += (rating - itemWeights[itemId]) * 0.1;
             }
             else
             {
-                itemWeights[feedback.Key] = feedback.Value;
+                itemWeights[itemId] -= (itemWeights[itemId] - rating) * 0.1;
             }
         }
+
+        feedbackScores.Clear();
     }
 
-    public void ExportModel()
+    public void ExportModel(string fileName)
     {
-        using (StreamWriter writer = new StreamWriter("model.txt"))
+        using (StreamWriter writer = new StreamWriter(fileName))
         {
-            foreach (var item in itemWeights)
+            foreach (var entry in itemWeights)
             {
-                writer.WriteLine($"{item.Key}:{item.Value}");
+                writer.WriteLine($"{entry.Key}:{entry.Value}");
             }
         }
         Console.WriteLine("Model exported successfully.");
     }
 
-    public void LoadModel()
+    public void LoadModel(string fileName)
     {
-        if (File.Exists("model.txt"))
+        if (File.Exists(fileName))
         {
-            string[] lines = File.ReadAllLines("model.txt");
-            foreach (string line in lines)
+            using (StreamReader reader = new StreamReader(fileName))
             {
-                string[] parts = line.Split(':');
-                if (parts.Length == 2 && double.TryParse(parts[1], out double weight))
+                while (!reader.EndOfStream)
                 {
-                    itemWeights[parts[0]] = weight;
+                    string line = reader.ReadLine();
+                    string[] parts = line.Split(':');
+                    itemWeights[parts[0]] = double.Parse(parts[1]);
                 }
             }
             Console.WriteLine("Model loaded successfully.");
         }
         else
         {
-            Console.WriteLine("Model file not found.");
+            Console.WriteLine("No model file found.");
         }
     }
 
-    private ItemShop GenerateAndDisplayItemShopWithReturn(List<Cosmetic> items)
+    private List<Cosmetic> SelectUniqueItems(int count, List<Cosmetic> excludeItems = null)
     {
-        List<Cosmetic> dailyItems = SelectItems(items, 6);
-        List<Cosmetic> featuredItems = SelectItems(items, 2);
+        excludeItems ??= new List<Cosmetic>();
+        HashSet<string> selectedIds = new HashSet<string>(excludeItems.Select(item => item.Id));
+        List<Cosmetic> selectedItems = new List<Cosmetic>();
+
+        while (selectedItems.Count < count)
+        {
+            Cosmetic randomItem = allItems[random.Next(allItems.Count)];
+            if (!selectedIds.Contains(randomItem.Id))
+            {
+                selectedItems.Add(randomItem);
+                selectedIds.Add(randomItem.Id);
+            }
+        }
+
+        return selectedItems;
+    }
+
+    private ItemShop GenerateAndDisplayItemShopWithReturn()
+    {
+        List<Cosmetic> dailyItems = SelectUniqueItems(6);
+        List<Cosmetic> featuredItems = SelectUniqueItems(2, dailyItems);
 
         ItemShop itemShop = new ItemShop { DailyItems = dailyItems, FeaturedItems = featuredItems };
         shopHistory.Add(itemShop);
@@ -333,43 +424,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        CosmeticShopAI ai = new CosmeticShopAI();
-        List<Cosmetic> items = ReadItems("cosmetics.txt");
+        List<Cosmetic> items = ReadItems("items.txt");
+        CosmeticShopAI ai = new CosmeticShopAI(items);
+
+        ai.LoadModel("model.txt");
+        ai.LoadBenchmarkShops();
 
         while (true)
         {
             DisplayMenu();
-
             string choice = Console.ReadLine();
 
             switch (choice)
             {
                 case "1":
-                    ai.GenerateAndDisplayItemShop(items);
+                    ai.GenerateAndDisplayItemShop();
                     break;
                 case "2":
-                    ai.RateItemShop(items);
+                    ai.RateItemShop();
                     break;
                 case "3":
                     ai.TrainCosmeticRelationship();
                     break;
                 case "4":
-                    ai.ExportModel();
-                    break;
-                case "5":
-                    ai.LoadModel();
-                    break;
-                case "6":
                     ai.AnalyzeShopPatterns();
                     break;
+                case "5":
+                    ai.BenchmarkAI();
+                    break;
+                case "6":
+                    ai.ExportModel("model.txt");
+                    break;
                 case "7":
-                    ai.BenchmarkAI(items);
+                    ai.LoadModel("model.txt");
                     break;
                 case "8":
-                    Console.WriteLine("Exiting the program...");
+                    ai.ExportBenchmarkShops(ai.LoadBenchmarkShops());
+                    break;
+                case "9":
                     return;
                 default:
-                    Console.WriteLine("Invalid option. Please try again.");
+                    Console.WriteLine("Invalid choice. Please try again.");
                     break;
             }
         }
@@ -377,58 +472,28 @@ class Program
 
     static void DisplayMenu()
     {
-        Console.WriteLine("Welcome to the Cosmetic Shop AI Trainer!");
         Console.WriteLine("1. Generate Item Shop");
-        Console.WriteLine("2. Generate and Rate Item Shop");
-        Console.WriteLine("3. Train Cosmetic Relationship");
-        Console.WriteLine("4. Export AI Model");
-        Console.WriteLine("5. Load AI Model");
-        Console.WriteLine("6. Analyze Shop Patterns");
-        Console.WriteLine("7. Benchmark AI");
-        Console.WriteLine("8. Exit");
-        Console.Write("Please select an option: ");
+        Console.WriteLine("2. Rate Item Shop");
+        Console.WriteLine("3. Train Relationships");
+        Console.WriteLine("4. Analyze Shop Patterns");
+        Console.WriteLine("5. Benchmark AI");
+        Console.WriteLine("6. Export Model");
+        Console.WriteLine("7. Load Model");
+        Console.WriteLine("8. Export Benchmark Data");
+        Console.WriteLine("9. Exit");
+        Console.Write("Enter your choice: ");
     }
 
-    static List<Cosmetic> ReadItems(string filename)
+    static List<Cosmetic> ReadItems(string fileName)
     {
         List<Cosmetic> items = new List<Cosmetic>();
 
-        if (!File.Exists(filename))
+        foreach (var line in File.ReadLines(fileName))
         {
-            Console.WriteLine($"Error: File {filename} not found.");
-            return items;
+            var parts = line.Split(new char[] { ':', ',' });
+            items.Add(new Cosmetic(parts[0], parts[1], int.Parse(parts[2])));
         }
 
-        string[] lines = File.ReadAllLines(filename);
-
-        foreach (string line in lines)
-        {
-            try
-            {
-                string[] parts = line.Split(':');
-                if (parts.Length != 2)
-                {
-                    Console.WriteLine($"Skipping invalid line: {line}");
-                    continue;
-                }
-
-                string category = parts[0];
-                string[] idAndPrice = parts[1].Split(',');
-                if (idAndPrice.Length != 2 || !int.TryParse(idAndPrice[1], out int price))
-                {
-                    Console.WriteLine($"Skipping invalid line: {line}");
-                    continue;
-                }
-
-                string id = idAndPrice[0];
-
-                items.Add(new Cosmetic(category, id, price));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error processing line: {line}. Error: {ex.Message}");
-            }
-        }
         return items;
     }
 }
