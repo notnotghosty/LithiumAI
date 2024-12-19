@@ -2,6 +2,7 @@
 **(currently there is no built-in method of implementing the data. Should be coming once the AI trainer is complete. Newtonsoft isn't actually required it's just a remanent from one of the older versions of Lithium AI)**
 
 LithiumAI is a console application designed to facilitate the generation and optimization of the Fortnite in-game item shop. Leveraging artificial intelligence, LithiumAI enables users to curate a diverse and appealing selection of cosmetics for players to explore and purchase.
+(This hasn't been updated in a while, I'm not sure if the AI even works because it would require tens of hours of testing that you can't automate. But it can randomize item shops.)
 
 ## Features
 - **Item Shop Generation**: Automatically generates a daily item shop and featured items based on AI-driven selection logic.
